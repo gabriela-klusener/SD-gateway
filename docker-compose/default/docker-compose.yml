@@ -1,0 +1,74 @@
+version: '3.8'
+
+services:
+  eureka-server:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: eureka-server:latest
+    ports:
+      - "8761:8761"
+    networks:
+      - app-network
+
+  api-gateway:
+    build:
+      context: ./api-gateway
+      dockerfile: Dockerfile
+    image: api-gateway:latest
+    ports:
+      - "8080:8080"
+    depends_on:
+      - eureka-server
+    volumes:
+      - ./api-gateway/src/main/resources/application.yml:/config/application.yml
+    environment:
+      SPRING_CONFIG_LOCATION: "/config/application.yml"
+    networks:
+      - app-network
+
+  project-service:
+    build:
+      context: ./project-service
+      dockerfile: Dockerfile
+    image: project-service:latest
+    depends_on:
+      - eureka-server
+    volumes:
+      - ./project-service/src/main/resources/application.yml:/config/application.yml
+    environment:
+      SPRING_CONFIG_LOCATION: "/config/application.yml"
+    networks:
+      - app-network
+
+  group-service:
+    build:
+      context: ./group-service
+      dockerfile: Dockerfile
+    image: group-service:latest
+    depends_on:
+      - eureka-server
+    volumes:
+      - ./group-service/src/main/resources/application.yml:/config/application.yml
+    environment:
+      SPRING_CONFIG_LOCATION: "/config/application.yml"
+    networks:
+      - app-network
+
+  user-service:
+    build:
+      context: ./user-service
+      dockerfile: Dockerfile
+    image: user-service:latest
+    depends_on:
+      - eureka-server
+    volumes:
+      - ./user-service/src/main/resources/application.yml:/config/application.yml
+    environment:
+      SPRING_CONFIG_LOCATION: "/config/application.yml"
+    networks:
+      - app-network
+
+networks:
+  app-network:
+    driver: bridge
